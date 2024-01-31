@@ -17,6 +17,6 @@ Managing a large data efficiently through a user-friendly interface is highly de
     - ```/get_all_movies```: Retrieves all movie records from the MongoDB collection and presents them in a readable JSON format.
 
 ### Usage:
-    - Clone the repository.
-    - Install the required dependencies using pip install -r requirements.txt.
-    - Run the application with python app.py.
+- Clone the repository.
+- Install the required dependencies using pip install -r requirements.txt.
+- Run the application with python app.py.
