@@ -4,15 +4,16 @@ from flask import Flask, jsonify, Response
 from flask_pymongo import PyMongo
 from bson import json_util, ObjectId
 import json
-import getpass # Take user input without displaying the characters in the console
+# import getpass # Take user input without displaying the characters in the console
+from db_connection import mongo_driver_uri
 
 app = Flask(__name__)
 
-username = input("Enter your username: ")
-password = getpass.getpass("Enter your password: ")
+# username = input("Enter your username: ")
+# password = getpass.getpass("Enter your password: ")
 
-db_name = 'sample_mflix'
-mongo_driver_uri = f"mongodb+srv://{username}:{password}@rsmongodbpracticecluste.0nqes.mongodb.net/{db_name}?retryWrites=true&w=majority"
+# db_name = 'sample_mflix'
+# mongo_driver_uri = f"mongodb+srv://{username}:{password}@rsmongodbpracticecluste.0nqes.mongodb.net/{db_name}?retryWrites=true&w=majority"
 
 # Create a new client and connect to the server
 # client = MongoClient(mongo_driver_uri, server_api=ServerApi('1'))
