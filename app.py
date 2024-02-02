@@ -7,9 +7,11 @@ import json
 from db_connection import mongo_driver_uri
 from functools import wraps
 from file_reader import get_all_user_credentials_from_persistent_storage
+from jwt_authentication import jwt_encode, jwt_decode
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
-
+app.config['SECRET_KEY'] = '1111-2222-3333-4444'
 # Configure Flask app to use MongoDB
 app.config['MONGO_URI'] = mongo_driver_uri
 mongo = PyMongo(app)
@@ -27,7 +29,21 @@ def auth_required(f):
                 
         return make_response('Invalid credentials provided. Could not verify your login!', 
                              401, 
-                             {'WWW-Authenticate': 'Basic Real="Login Required"'})
+                             {'WWW-Authenticate': 'Basic realm="Login Required"'})
+    return decorated
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.args.get('token')
+        if not token:
+            return jsonify({'message': 'Token not provided'}), 401
+        try:
+            decoded_token = jwt_decode(token, app.config['SECRET_KEY'])
+        except:
+            return jsonify({'message': 'Invalid token provided'}), 403
+        return f(*args, **kwargs)
+    
     return decorated
 
 @app.route('/')
@@ -37,11 +53,23 @@ def index():
 @app.route('/login')
 @auth_required
 def login():
-    return '<h1>Login successful!<h1>'
+    auth = request.authorization
+    encoded_token = jwt_encode({'user': auth.username, 
+                                        'exp': datetime.utcnow() + timedelta(hours=24)}, 
+                                       app.config['SECRET_KEY'])
+    
+    return jsonify({'message': 'Login successful', 'token': encoded_token})
+    # return '<h1>Login successful!<h1>'
+
+@app.route('/protected')
+@token_required
+def protected():
+    return jsonify({'message': 'token accepted'})
 
 # GET API endpoint to retrieve a record by ID
 @app.route('/get_movie/<string:record_id>', methods=['GET'])
 @auth_required
+@token_required
 def get_one_record(record_id):
     try:
         # Convert the provided ID to ObjectId
@@ -59,6 +87,7 @@ def get_one_record(record_id):
 
 @app.route('/get_all_movies', methods=['GET'])
 @auth_required
+@token_required
 def get_all_records():
     try:
         # Access MongoDB collection
